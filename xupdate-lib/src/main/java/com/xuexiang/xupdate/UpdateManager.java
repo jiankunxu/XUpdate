@@ -268,6 +268,7 @@ public class UpdateManager implements IUpdateProxy {
     @Override
     public UpdateEntity parseJson(@NonNull String json) throws Exception {
         UpdateLog.i("服务端返回的最新版本信息1:" + json);
+
         if (mIUpdateProxy != null) {
             mUpdateEntity = mIUpdateProxy.parseJson(json);
         } else {
@@ -289,7 +290,19 @@ public class UpdateManager implements IUpdateProxy {
                 }
             });
         } else {
-            mIUpdateParser.parseJson(json, new IUpdateParseCallback() {
+            String jsontemp="{\n" +
+                    "  \"Code\": 0,\n" +
+                    "  \"Msg\": \"\",\n" +
+                    "  \"UpdateStatus\": 2,\n" +
+                    "  \"VersionCode\": 3,\n" +
+                    "  \"VersionName\": \"1.0.2\",\n" +
+                    "  \"UploadTime\": \"2018-07-10 17:28:41\",\n" +
+                    "  \"ModifyContent\": \"\\r\\n1、优化api接口。\\r\\n2、添加使用demo演示。\\r\\n3、新增自定义更新服务API接口。\\r\\n4、优化更新提示界面。\",\n" +
+                    "  \"DownloadUrl\": \"https://xuexiangjys.oss-cn-shanghai.aliyuncs.com/apk/xupdate_demo_1.0.2.apk\",\n" +
+                    "  \"ApkSize\": 4096,\n" +
+                    "  \"ApkMd5\": \"E4B79A36EFB9F17DF7E3BB161F9BCFD8\"\n" +
+                    "}";
+            mIUpdateParser.parseJson(jsontemp, new IUpdateParseCallback() {
                 @Override
                 public void onParseResult(UpdateEntity updateEntity) {
                     mUpdateEntity = refreshParams(updateEntity);
