@@ -267,7 +267,7 @@ public class UpdateManager implements IUpdateProxy {
      */
     @Override
     public UpdateEntity parseJson(@NonNull String json) throws Exception {
-        UpdateLog.i("服务端返回的最新版本信息:" + json);
+        UpdateLog.i("服务端返回的最新版本信息1:" + json);
         if (mIUpdateProxy != null) {
             mUpdateEntity = mIUpdateProxy.parseJson(json);
         } else {
@@ -279,7 +279,7 @@ public class UpdateManager implements IUpdateProxy {
 
     @Override
     public void parseJson(@NonNull String json, final IUpdateParseCallback callback) throws Exception {
-        UpdateLog.i("服务端返回的最新版本信息:" + json);
+        UpdateLog.i("服务端返回的最新版本信息2:" + json);
         if (mIUpdateProxy != null) {
             mIUpdateProxy.parseJson(json, new IUpdateParseCallback() {
                 @Override
