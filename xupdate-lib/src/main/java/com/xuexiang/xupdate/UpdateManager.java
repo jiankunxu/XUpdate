@@ -18,6 +18,7 @@ package com.xuexiang.xupdate;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
@@ -25,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.xuexiang.xupdate.entity.PromptEntity;
 import com.xuexiang.xupdate.entity.UpdateEntity;
 import com.xuexiang.xupdate.listener.IUpdateParseCallback;
@@ -39,7 +42,10 @@ import com.xuexiang.xupdate.proxy.impl.DefaultUpdatePrompter;
 import com.xuexiang.xupdate.service.OnFileDownloadListener;
 import com.xuexiang.xupdate.utils.UpdateUtils;
 
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -55,6 +61,7 @@ import static com.xuexiang.xupdate.entity.UpdateError.ERROR.PROMPT_ACTIVITY_DEST
  * @since 2018/7/1 下午9:49
  */
 public class UpdateManager implements IUpdateProxy {
+    private Gson gson;
     /**
      * 版本更新代理
      */
@@ -132,6 +139,7 @@ public class UpdateManager implements IUpdateProxy {
      * @param builder 版本更新管理构建者
      */
     private UpdateManager(Builder builder) {
+        gson=new Gson();
         mContext = new WeakReference<>(builder.context);
         mUpdateUrl = builder.updateUrl;
         mParams = builder.params;
@@ -268,18 +276,25 @@ public class UpdateManager implements IUpdateProxy {
     @Override
     public UpdateEntity parseJson(@NonNull String json) throws Exception {
         UpdateLog.i("服务端返回的最新版本信息1:" + json);
-        String jsontemp="{\n" +
-                "  \"Code\": 0,\n" +
-                "  \"Msg\": \"\",\n" +
-                "  \"UpdateStatus\": 2,\n" +
-                "  \"VersionCode\": 3,\n" +
-                "  \"VersionName\": \"1.0.2\",\n" +
-                "  \"UploadTime\": \"2018-07-10 17:28:41\",\n" +
-                "  \"ModifyContent\": \"\\r\\n1、优化api接口。\\r\\n2、添加使用demo演示。\\r\\n3、新增自定义更新服务API接口。\\r\\n4、优化更新提示界面。\",\n" +
-                "  \"DownloadUrl\": \"https://xuexiangjys.oss-cn-shanghai.aliyuncs.com/apk/xupdate_demo_1.0.2.apk\",\n" +
-                "  \"ApkSize\": 4096,\n" +
-                "  \"ApkMd5\": \"E4B79A36EFB9F17DF7E3BB161F9BCFD8\"\n" +
-                "}";
+        String jsontemp="";
+        JsonObject jsonObject=gson.fromJson(json,JsonObject.class);
+
+        if(jsonObject.has("data")&&!jsonObject.get("data").isJsonNull()&&jsonObject.get("code").getAsString().equals("0")){
+            JsonObject jsonData=jsonObject.getAsJsonObject("data");
+            String[] newVersionArray=jsonData.get("version").getAsString().split("\\.");
+            int newVersionInt=Integer.parseInt(newVersionArray[0])*100+Integer.parseInt(newVersionArray[1])*10+Integer.parseInt(newVersionArray[2]);
+            JsonObject jsonRequest=new JsonObject();
+            jsonRequest.addProperty("Code",0);
+            jsonRequest.addProperty("Msg","");
+            jsonRequest.addProperty("UpdateStatus",2);
+            jsonRequest.addProperty("VersionCode",newVersionInt);
+            jsonRequest.addProperty("VersionName",jsonData.get("version").getAsString());
+            jsonRequest.addProperty("ModifyContent",jsonData.get("updateLog").getAsString());
+            jsonRequest.addProperty("DownloadUrl",jsonData.get("downloadUrl").getAsString());
+            jsonRequest.addProperty("ApkSize",0);
+            jsonRequest.addProperty("ApkMd5","");
+            jsontemp=gson.toJson(jsonRequest);
+        }
         if (mIUpdateProxy != null) {
             mUpdateEntity = mIUpdateProxy.parseJson(jsontemp);
         } else {

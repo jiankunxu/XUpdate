@@ -57,8 +57,10 @@ import com.xuexiang.xutil.resource.ResourceUtils;
 import com.xuexiang.xutil.tip.ToastUtils;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -130,11 +132,22 @@ public class MainFragment extends XPageSimpleListFragment {
                         .isAutoMode(true)
                         .update();
                 break;
+//            case 4:
+//                XUpdate.newBuild(getActivity())
+//                        .updateUrl(mUpdateUrl2)
+//                        .update();
+//                break;
+
             case 4:
+                Map<String,Object> requestMap = new HashMap<String,Object>();
+                requestMap.put("name","车联网Android");
+                requestMap.put("platform","2");
                 XUpdate.newBuild(getActivity())
-                        .updateUrl(mUpdateUrl2)
+                        .updateUrl("http://58.57.105.14:8003/v1/appVersion/getAppVersion")
+                        .params(requestMap)
                         .update();
                 break;
+
             case 5:
                 XUpdate.newBuild(getActivity())
                         .updateHttpService(new XHttpUpdateHttpService("https://gitee.com"))
@@ -179,7 +192,7 @@ public class MainFragment extends XPageSimpleListFragment {
                 break;
             case 8:
                 XUpdate.newBuild(getActivity())
-                        .supportBackgroundUpdate(true)
+//                        .supportBackgroundUpdate(true)
 //                        // 忽略下载异常，不关闭更新提示窗
 //                        .promptIgnoreDownloadError(true)
                         .build()
